@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "anilkumarsahu2623/Ecom_project-CI"  // Replace with your Docker Hub repository
+        DOCKER_IMAGE = "anilkumarsahu2623/ecom_project-ci"  // Replace with your Docker Hub repository
         DOCKER_CREDENTIALS_ID = "dockerhub_credentials" // DockerHub credentials ID in Jenkins
         GIT_REPO = "https://github.com/anilkumarsahu2623/Ecom_project.git" // Your GitHub repo URL
         // GIT_CREDENTIALS_ID = "github_credentials"  // Jenkins credentials ID for GitHub
