@@ -17,21 +17,24 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Build Docker image using the Dockerfile in the repository
-                    def image = docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
-                }
-            }
-        }
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //             // Build Docker image using the Dockerfile in the repository
+        //             def image = docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
+        //         }
+        //     }
+        // }
 
-        stage('Push Docker Image') {
+        stage('Docker Image Build & Push') {
             steps {
                 script {
                     // Push Docker image to Docker Hub
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                        // sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                        sh "docker build -t ecom-project-jenkins-ci ."
+                        sh "docker tag ecom-project-jenkins-ci anilkumarsahu2623/ecom_project:latest "
+                        sh "docker push anilkumarsahu2623/ecom_project:latest "
                     }
                 }
             }
