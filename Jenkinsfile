@@ -54,4 +54,3 @@ pipeline {
             sh "docker rmi ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
         }
     }
-}
