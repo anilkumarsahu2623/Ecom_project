@@ -26,8 +26,8 @@ pipeline {
 
         stage('Run Script in WSL') {
             steps {
-                // Run the shell script using WSL
-                bat 'wsl nohup /mnt/c/path/to/myscript.sh > /mnt/c/path/to/output.log 2>&1 &'
+                // Run the Python script using WSL
+                bat 'wsl nohup python3 /mnt/c/ProgramData/Jenkins/workspace/Ecom_project_Pipeline-CI/app.py > /mnt/c/ProgramData/Jenkins/workspace/Ecom_project_Pipeline-CI/output.log 2>&1 &'
             }
         }
 
@@ -46,7 +46,11 @@ pipeline {
     post {
         always {
             // Clean up Docker images after the build
-            sh "docker rmi ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+            script {
+                if (sh(script: "docker images -q ${DOCKER_IMAGE}:${env.BUILD_NUMBER}", returnStatus: true) == 0) {
+                    sh "docker rmi ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                }
+            }
         }
     }
 }
