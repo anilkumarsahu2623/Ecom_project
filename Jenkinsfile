@@ -9,7 +9,6 @@ pipeline {
     }
 
     stages {
-        {
         stage('Checkout') {
             steps {
                 // Clone the GitHub repository using Git credentials
@@ -27,6 +26,7 @@ pipeline {
         //     }
         // }
         stages {
+            {
         stage('Run Script in WSL') {
             steps {
                 bat 'wsl nohup /mnt/c/path/to/myscript.sh > /mnt/c/path/to/output.log 2>&1 &'
