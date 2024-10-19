@@ -9,6 +9,7 @@ pipeline {
     }
 
     stages {
+        {
         stage('Checkout') {
             steps {
                 // Clone the GitHub repository using Git credentials
