@@ -7,8 +7,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: "https://github.com/anilkumarsahu2623/Ecom_project.git"
+                git(
+                    url: 'https://github.com/anilkumarsahu2623/Ecom_project.git',
+                    branch: 'main',
+                    credentialsId: 'docker'  // Ensure this is the correct Git credential ID
+                )
             }
         }
         stage('Docker Login') {
@@ -17,8 +20,10 @@ pipeline {
                     # Remove existing Docker credentials
                     rm -rf ~/.docker/config.json || true
                     security delete-generic-password -s "Docker Credentials" || true
+
                     # Verify Docker is running
                     docker info
+
                     # Login to Docker Hub
                     echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin || {
                         echo "Docker login failed, retrying after cleanup..."
@@ -32,33 +37,22 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    try {
-                        echo "Building Docker image..."
-                        sh """
-                            docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
-                            docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
-                        """
-                    } catch (Exception e) {
-                        echo "Error during Docker build: ${e.getMessage()}"
-                        throw e
-                    }
+                    echo "Building Docker image..."
+                    sh """
+                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+                        docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
+                    """
                 }
             }
         }
- 
         stage('Docker Push') {
             steps {
                 script {
-                    try {
-                        echo "Pushing Docker image to registry..."
-                        sh """
-                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                            docker push ${DOCKER_IMAGE}:latest
-                        """
-                    } catch (Exception e) {
-                        echo "Error during Docker push: ${e.getMessage()}"
-                        throw e
-                    }
+                    echo "Pushing Docker image to registry..."
+                    sh """
+                        docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                        docker push ${DOCKER_IMAGE}:latest
+                    """
                 }
             }
         }
