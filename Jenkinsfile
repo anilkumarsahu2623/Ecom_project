@@ -2,10 +2,8 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE = "anilkumarsahu2623/ecom_project"
-        DOCKER_CREDENTIALS_ID = "docker"  // DockerHub credentials ID in Jenkins
-        tools {
-  git 'Git'  // Name of the Git installation as configured in Global Tool Configuration
-}
+        DOCKER_CREDENTIALS_ID = "dockerhub_credentials"  // DockerHub credentials ID in Jenkins
+        GIT_CREDENTIALS_ID = "git_credentials"          // Git credentials ID in Jenkins
     }
     stages {
         stage('Checkout') {
@@ -13,10 +11,11 @@ pipeline {
                 git(
                     url: 'https://github.com/anilkumarsahu2623/Ecom_project.git',
                     branch: 'main',
-                    credentialsId: 'docker'  // Ensure this is the correct Git credential ID
+                    credentialsId: "${GIT_CREDENTIALS_ID}"  // GitHub credentials ID
                 )
             }
         }
+        
         stage('Docker Build') {
             steps {
                 script {
@@ -28,10 +27,22 @@ pipeline {
                 }
             }
         }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    echo "Logging in to Docker Hub..."
+                    sh """
+                        echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin
+                    """
+                }
+            }
+        }
+
         stage('Docker Push') {
             steps {
                 script {
-                    echo "Pushing Docker image to registry..."
+                    echo "Pushing Docker image to Docker Hub..."
                     sh """
                         docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
                         docker push ${DOCKER_IMAGE}:latest
@@ -40,19 +51,18 @@ pipeline {
             }
         }
     }
+
     post {
         success {
             echo "Pipeline executed successfully!"
         }
         failure {
-            echo "Pipeline failed! Check the logs for details."
+            echo "Pipeline failed. Please check the logs."
         }
         always {
             sh '''
-                # Cleanup
+                # Cleanup: Logout of Docker and clean up the local image cache
                 docker logout || true
-                rm -rf ~/.docker/config.json || true
-                # Optional: Clean Docker images
                 docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
                 docker rmi ${DOCKER_IMAGE}:latest || true
             '''
