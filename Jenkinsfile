@@ -2,7 +2,8 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE = "anilkumarsahu2623/ecom_project"
-        DOCKER_REGISTRY_CREDENTIALS = credentials('docker')
+        //DOCKER_REGISTRY_CREDENTIALS = credentials('docker')
+        DOCKER_CREDENTIALS_ID = "docker" // DockerHub credentials ID in Jenkins
     }
     stages {
         stage('Checkout') {
@@ -14,22 +15,22 @@ pipeline {
                 )
             }
         }
-        stage('Docker Login') {
+        //stage('Docker Login') {
             steps {
                 sh '''
                     # Remove existing Docker credentials
-                    rm -rf ~/.docker/config.json || true
-                    security delete-generic-password -s "Docker Credentials" || true
+                    //rm -rf ~/.docker/config.json || true
+                    //security delete-generic-password -s "Docker Credentials" || true
 
                     # Verify Docker is running
-                    docker info
+                    //docker info
 
                     # Login to Docker Hub
-                    echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin || {
-                        echo "Docker login failed, retrying after cleanup..."
-                        docker logout
-                        rm -rf ~/.docker/config.json || true
-                        echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin
+                    //echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin || {
+                        //echo "Docker login failed, retrying after cleanup..."
+                        //docker logout
+                        //rm -rf ~/.docker/config.json || true
+                        //echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin
                     }
                 '''
             }
