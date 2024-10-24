@@ -3,6 +3,9 @@ pipeline {
     environment {
         DOCKER_IMAGE = "anilkumarsahu2623/ecom_project"
         DOCKER_CREDENTIALS_ID = "docker"  // DockerHub credentials ID in Jenkins
+        tools {
+  git 'Git'  // Name of the Git installation as configured in Global Tool Configuration
+}
     }
     stages {
         stage('Checkout') {
