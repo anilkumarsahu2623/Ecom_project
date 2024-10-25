@@ -17,10 +17,10 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    // docker.withRegistry(DOCKER_IMAGE, DOCKER_REGISTRY_CREDENTIALS) {
-                        // echo 'Successfully logged in to Docker registry'
-                   //  }
-                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') 
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker')  {
+                        echo 'Successfully logged in to Docker registry'
+                   }
+                    
                 }
             }
         }
