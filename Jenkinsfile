@@ -1,40 +1,53 @@
 pipeline {
     agent any
+    
     environment {
         DOCKER_IMAGE = "anilkumarsahu2623/ecom_project"
-        DOCKER_CREDENTIALS_ID = "dockerhub_credentials"  // DockerHub credentials ID in Jenkins
-        GIT_CREDENTIALS_ID = "git_credentials"          // Git credentials ID in Jenkins
+        DOCKER_REGISTRY_CREDENTIALS = credentials('docker')
     }
+    
     stages {
         stage('Checkout') {
             steps {
-                git(
-                    url: 'https://github.com/anilkumarsahu2623/Ecom_project.git',
-                    branch: 'main',
-                    credentialsId: "${GIT_CREDENTIALS_ID}"  // GitHub credentials ID
-                )
+                git branch: 'main',
+                    url: "https://github.com/anilkumarsahu2623/Ecom_project.git"
+            }
+        }
+        
+        stage('Docker Login') {
+            steps {
+                sh '''
+                    # Remove existing Docker credentials
+                    rm -rf ~/.docker/config.json || true
+                    security delete-generic-password -s "Docker Credentials" || true
+                    
+                    # Verify Docker is running
+                    docker info
+                    
+                    # Login to Docker Hub
+                    echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin || {
+                        echo "Docker login failed, retrying after cleanup..."
+                        docker logout
+                        rm -rf ~/.docker/config.json || true
+                        echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin
+                    }
+                '''
             }
         }
         
         stage('Docker Build') {
             steps {
                 script {
-                    echo "Building Docker image..."
-                    sh """
-                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
-                        docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
-                    """
-                }
-            }
-        }
-
-        stage('Docker Login') {
-            steps {
-                script {
-                    echo "Logging in to Docker Hub..."
-                    sh """
-                        echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin
-                    """
+                    try {
+                        echo "Building Docker image..."
+                        sh """
+                            docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+                            docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
+                        """
+                    } catch (Exception e) {
+                        echo "Error during Docker build: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }
         }
@@ -42,30 +55,41 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
-                    echo "Pushing Docker image to Docker Hub..."
-                    sh """
-                        docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                        docker push ${DOCKER_IMAGE}:latest
-                    """
+                    try {
+                        echo "Pushing Docker image to registry..."
+                        sh """
+                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            docker push ${DOCKER_IMAGE}:latest
+                        """
+                    } catch (Exception e) {
+                        echo "Error during Docker push: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }
         }
     }
-
+    
     post {
         success {
             echo "Pipeline executed successfully!"
         }
         failure {
-            echo "Pipeline failed. Please check the logs."
+            echo "Pipeline failed! Check the logs for details."
         }
         always {
             sh '''
-                # Cleanup: Logout of Docker and clean up the local image cache
+                # Cleanup
                 docker logout || true
+                rm -rf ~/.docker/config.json || true
+                security delete-generic-password -s "Docker Credentials" || true
+            '''
+            
+            // Clean up Docker images
+            sh """
                 docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
                 docker rmi ${DOCKER_IMAGE}:latest || true
-            '''
+            """
         }
     }
 }
