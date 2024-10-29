@@ -47,7 +47,7 @@ pipeline {
                 script {
                     try {
                         echo "Pushing Docker image to registry..."
-                        sh """
+                        bat """
                             docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
                             docker push ${DOCKER_IMAGE}:latest
                         """
