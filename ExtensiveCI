@@ -9,7 +9,7 @@
     agent any\
     \
     environment \{\
-        DOCKER_IMAGE = "divyavundavalli/ecom_projectexci"\
+        DOCKER_IMAGE = "anilkumarsahu2623/ecom_projectexci"\
         DOCKER_REGISTRY_CREDENTIALS = credentials('docker')\
         VENV_NAME = "venv"\
         PYTHON_VERSION = "python3"\
@@ -25,7 +25,7 @@
         stage('Checkout') \{\
             steps \{\
                 git branch: 'main',\
-                    url: "https://github.com/DivyaJyothiVundavalli/Ecom_Project_space.git"\
+                    url: "https://github.com/anilkumarsahu2623/Ecom_project.git"\
             \}\
         \}\
         \
