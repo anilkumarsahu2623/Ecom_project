@@ -21,15 +21,15 @@ pipeline {
             }
         }
 
-        stage('Setup Python Environment') {
+ stage('Setup Python Environment') {
     steps {
         script {
             bat """
                 python -m venv ${VENV_NAME} || exit 1
-                call ${VENV_NAME}\\Scripts\\activate || exit 1
-                python -m pip install --upgrade pip || exit 1
-                python -m pip install Flask==2.0.1 Werkzeug==2.0.1 pytest==7.4.0 pytest-cov==4.1.0 || exit 1
-                python -m pip install -r requirements.txt || exit 1
+                call ${VENV_NAME}\\Scripts\\activate.bat || exit 1
+                ${VENV_NAME}\\Scripts\\python -m pip install --upgrade pip || exit 1
+                ${VENV_NAME}\\Scripts\\python -m pip install Flask==2.0.1 Werkzeug==2.0.1 pytest==7.4.0 pytest-cov==4.1.0 || exit 1
+                ${VENV_NAME}\\Scripts\\python -m pip install -r requirements.txt || exit 1
             """
         }
     }
