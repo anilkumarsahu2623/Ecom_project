@@ -151,7 +151,8 @@ pipeline {
                 script {
                     try {
                         bat """
-                            echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin
+                             withDockerRegistry(credentialsId: 'docker', toolName: 'docker')  {
+                        echo 'Successfully logged in to Docker registry' }
                             docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
                             docker push ${DOCKER_IMAGE}:latest
                         """
